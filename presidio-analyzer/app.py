@@ -10,6 +10,17 @@ from typing import Tuple
 from flask import Flask, Response, jsonify, request
 from presidio_analyzer import AnalyzerEngine, AnalyzerEngineProvider, AnalyzerRequest
 from werkzeug.exceptions import HTTPException
+from presidio_analyzer.nlp_engine import NlpEngineProvider
+
+configuration = {
+    "nlp_engine_name": "spacy",
+    "models": [{"lang_code": "en", "model_name": "en_core_web_sm"}]  # 12MB model
+}
+
+provider = NlpEngineProvider(nlp_configuration=configuration)
+nlp_engine = provider.create_engine()
+
+analyzer = AnalyzerEngine(nlp_engine=nlp_engine)  # Pass custom engine
 
 app = Flask(__name__)  # <-- This variable MUST be named 'app'
 
