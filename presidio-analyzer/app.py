@@ -11,13 +11,13 @@ from flask import Flask, Response, jsonify, request
 from presidio_analyzer import AnalyzerEngine, AnalyzerEngineProvider, AnalyzerRequest
 from werkzeug.exceptions import HTTPException
 
-app = Flask(__app__)  # <-- This variable MUST be named 'app'
+app = Flask(__name__)  # <-- This variable MUST be named 'app'
 
 @app.route('/')
 def home():
     return "Presidio Analyzer Running"
 
-if __app__ == '__main__':
+if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
 
 DEFAULT_PORT = "3000"
