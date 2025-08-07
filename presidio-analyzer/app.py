@@ -67,6 +67,21 @@ class Server:
             recognizer_registry_conf_file=recognizer_registry_conf_file,
         ).create_engine()
         self.logger.info(WELCOME_MESSAGE)
+
+        # Add to Server.__init__() method:
+        nlp_config = {
+            "nlp_engine_name": "spacy",
+            "models": [
+                {
+                    "lang_code": "en",
+                    "model_name": "en_core_web_sm"  # or "lg" if you upgrade memory
+                }
+            ]
+        }
+        
+        self.engine = AnalyzerEngine(
+            nlp_engine=NlpEngineProvider(nlp_configuration=nlp_config).create_engine()
+        )
         
         @self.app.route("/health")
         @self.app.route("/healthz")  # Dual endpoint support
