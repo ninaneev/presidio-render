@@ -10,6 +10,15 @@ from typing import Tuple
 from flask import Flask, Response, jsonify, request
 from presidio_analyzer import AnalyzerEngine, AnalyzerEngineProvider, AnalyzerRequest
 from werkzeug.exceptions import HTTPException
+from flask import Flask
+app = Flask(__name__)  # <-- This variable MUST be named 'app'
+
+@app.route('/')
+def home():
+    return "Presidio Analyzer Running"
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
 
 DEFAULT_PORT = "3000"
 
