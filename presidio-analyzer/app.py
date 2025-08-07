@@ -56,8 +56,8 @@ class Server:
             recognizer_registry_conf_file=recognizer_registry_conf_file,
         ).create_engine()
         self.logger.info(WELCOME_MESSAGE)
-
-       @self.app.route("/health")
+        
+        @self.app.route("/health")
         @self.app.route("/healthz")  # Dual endpoint support
         def health() -> Tuple[str, int]:
             """Return health status."""
