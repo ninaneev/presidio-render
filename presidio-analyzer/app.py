@@ -10,14 +10,14 @@ from typing import Tuple
 from flask import Flask, Response, jsonify, request
 from presidio_analyzer import AnalyzerEngine, AnalyzerEngineProvider, AnalyzerRequest
 from werkzeug.exceptions import HTTPException
-from flask import Flask
-app = Flask(__name__)  # <-- This variable MUST be named 'app'
+
+app = Flask(__app__)  # <-- This variable MUST be named 'app'
 
 @app.route('/')
 def home():
     return "Presidio Analyzer Running"
 
-if __name__ == '__main__':
+if __app__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
 
 DEFAULT_PORT = "3000"
@@ -57,10 +57,18 @@ class Server:
         ).create_engine()
         self.logger.info(WELCOME_MESSAGE)
 
-        @self.app.route("/health")
-        def health() -> str:
-            """Return basic health probe result."""
-            return "Presidio Analyzer service is up"
+       @self.app.route("/health")
+        @self.app.route("/healthz")  # Dual endpoint support
+        def health() -> Tuple[str, int]:
+            """Return health status."""
+            return jsonify({
+                "status": "ok",
+                "version": "1.0",
+                "dependencies": {
+                    "nlp_engine": self.engine.nlp_engine.__class__.__name__,
+                    "recognizers": len(self.engine.registry.recognizers)
+                }
+            }), 200
 
         @self.app.route("/analyze", methods=["POST"])
         def analyze() -> Tuple[str, int]:
@@ -88,7 +96,7 @@ class Server:
                     regex_flags=req_data.regex_flags,
                 )
                 _exclude_attributes_from_dto(recognizer_result_list)
-
+                
                 return Response(
                     json.dumps(
                         recognizer_result_list,
@@ -145,6 +153,11 @@ class Server:
         def http_exception(e):
             return jsonify(error=e.description), e.code
 
+        @self.app.route("/")
+        def home() -> str:
+            """Root endpoint with welcome message."""
+            return WELCOME_MESSAGE
+
 
 def _exclude_attributes_from_dto(recognizer_result_list):
     excluded_attributes = [
@@ -161,7 +174,8 @@ def create_app():  # noqa
     return server.app
 
 
+app = create_app()  # Create app instance for Gunicorn
+
 if __name__ == "__main__":
-    app = create_app()
     port = int(os.environ.get("PORT", DEFAULT_PORT))
     app.run(host="0.0.0.0", port=port)
